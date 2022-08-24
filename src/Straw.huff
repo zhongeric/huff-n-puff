@@ -1,0 +1,38 @@
+/* Interface */
+#define function name() view returns (string)
+
+/* Storage Slots */
+#define constant VALUE_LOCATION = FREE_STORAGE_POINTER()
+
+#define constant MY_NAME = 0x466964646c6572 // 7 bytes, 0x07
+
+/* Methods */
+#define macro GET_NAME() = takes(0) returns(0) {
+    // store dynamic offset of 0x20 at 0x00
+    0x20                                     // [0x20]
+    0x00                                     // [0x00, 0x20]
+    mstore                                   // []
+
+    // store string length of 0x07 at 0x20
+    0x07
+    0x20
+    mstore
+
+    // store bytes for "Fiddler" at 0x40
+    __RIGHTPAD(0x466964646c6572)
+    0x40
+    mstore
+
+    // return full 96 byte value
+    0x60 
+    0x00
+    return
+}
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr
+    dup1 0x06fdde03 eq name jumpi
+
+    name:
+        GET_NAME()
+}
